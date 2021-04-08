@@ -1,4 +1,4 @@
-package com.vladyslav.encryptedchat;
+package com.vladyslav.encryptedchat.Views;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,24 +17,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.firebase.ui.database.FirebaseListOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.vladyslav.encryptedchat.Controllers.KeyController;
 import com.vladyslav.encryptedchat.Models.Message;
+import com.vladyslav.encryptedchat.R;
 
 public class MainActivity extends AppCompatActivity {
-
     private static final int SIGN_IN_CODE = 1;
     private RelativeLayout mainLayout;
     private FirebaseListAdapter<Message> adapter;
     private FloatingActionButton sendBtn;
+    private static final String CHATS_STORAGE = "chats";
+    private KeyController keyController;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -57,26 +54,37 @@ public class MainActivity extends AppCompatActivity {
 
         mainLayout = findViewById(R.id.activity_main);
         sendBtn = findViewById(R.id.btnSend);
+
+        keyController = KeyController.getInstance();
+
+        // Добавление обработчика на кнопку отправить
         sendBtn.setOnClickListener(v -> {
             EditText textField = findViewById(R.id.msgField);
 
-            if(textField.getText().toString().equals(""))
+            // Если ничего не введенно
+            if (textField.getText().toString().equals(""))
                 return;
 
-            FirebaseDatabase.getInstance().getReference().push().setValue(new Message(
+            Log.d("CHAT_DEBUG", "generated key: " + keyController.getCryptographyKey());
+
+            // Отправляем сообщение
+            FirebaseDatabase.getInstance().getReference(CHATS_STORAGE).push().setValue(new Message(
                             FirebaseAuth.getInstance().getCurrentUser().getEmail(),
                             textField.getText().toString()
                     )
             );
+
+            // Очищаем текстовое поле
             textField.setText("");
         });
 
-        if (FirebaseAuth.getInstance().getCurrentUser() == null){
+        // Проверка авторизован ли пользователь
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            // В случае первого входа - показать окно регистрации\входа
             startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder().build(), SIGN_IN_CODE);
-        }
-        else{
+        } else {
             showAlert("Вы авторизированы");
-            checkKey();
+            keyController.initKey();
             displayAllMessages();
         }
     }
@@ -89,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         ListView listOfMessages = findViewById(R.id.msgList);
 
         FirebaseListOptions<Message> options = new FirebaseListOptions.Builder<Message>()
-                .setQuery(FirebaseDatabase.getInstance().getReference(), Message.class)
+                .setQuery(FirebaseDatabase.getInstance().getReference(CHATS_STORAGE), Message.class)
                 .setLayout(R.layout.list_item)
                 .build();
 
@@ -106,31 +114,9 @@ public class MainActivity extends AppCompatActivity {
         listOfMessages.setAdapter(adapter);
     }
 
-    private void checkKey(){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("Keys")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d("CHAT_TESTING", document.getId() + " => " + document.getData());
-                        }
-                    } else {
-                        Log.w("CHAT_TESTING", "Error getting documents.", task.getException());
-                    }
-                });
-    }
-
-    private void generateKey(){
-
-
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference keys = database.getReference("Keys");
-        keys.setValue("Hello, World!");
+    @Override
+    protected void onStop() {
+        keyController.detachKey();
+        super.onStop();
     }
 }
