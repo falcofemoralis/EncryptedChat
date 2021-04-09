@@ -1,4 +1,4 @@
-package com.vladyslav.encryptedchat.Controllers;
+package com.vladyslav.encryptedchat.Managers;
 
 import android.util.Log;
 
@@ -7,15 +7,17 @@ import com.vladyslav.encryptedchat.Models.KeyModel;
 import com.vladyslav.encryptedchat.Models.KeyModel.Key;
 import com.vladyslav.encryptedchat.lib.ExCallable;
 
-public class KeyController {
+import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
+
+public class KeyManager {
     private KeyModel keyModel;
     private Key key;
 
-    private static KeyController instance;
+    private static KeyManager instance;
 
-    public static KeyController getInstance() {
+    public static KeyManager getInstance() {
         if (instance == null) {
-            instance = new KeyController();
+            instance = new KeyManager();
             instance.init();
         }
         return instance;
@@ -36,10 +38,10 @@ public class KeyController {
 /*                keyModel.addKeyUpdateListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        Log.d("CHAT_DEBUG", "key will be updated: ");
+                        Log.d(DEBUG_TAG, "key will be updated: ");
 
                         attachKey(snapshot.getValue(Key.class), aVoid -> {
-                            Log.d("CHAT_DEBUG", "key was updated: ");
+                            Log.d(DEBUG_TAG, "key was updated: ");
                         });
                     }
 
@@ -62,13 +64,13 @@ public class KeyController {
             // Generate key
             key = new Key("123312", 1);
             keyModel.updateKey(key, KeyUpdateType.NEW, exCallable);
-            Log.d("CHAT_DEBUG", "new key uses: " + key.uses);
+            Log.d(DEBUG_TAG, "new key uses: " + key.uses);
         } else {
             if (serverKey.uses < 2) {
                 key = serverKey;
                 keyModel.updateKey(key, KeyUpdateType.INC, exCallable);
                 // TODO unblock input
-                Log.d("CHAT_DEBUG", "key uses: " + key.uses);
+                Log.d(DEBUG_TAG, "key uses: " + key.uses);
             }
         }
     }

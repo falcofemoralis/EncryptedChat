@@ -15,6 +15,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.vladyslav.encryptedchat.Constants.KeyUpdateType;
 import com.vladyslav.encryptedchat.lib.ExCallable;
 
+import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
+
 public class KeyModel {
     private static final String KEY_STORAGE = "key"; // Путь к расположению ключа в базе
     private static KeyModel instance;
@@ -64,7 +66,7 @@ public class KeyModel {
                     if (task.isSuccessful()) {
                         exCallable.call(task.getResult().getValue(Key.class));
                     } else {
-                        Log.e("CHAT_DEBUG", "Error getting data", task.getException());
+                        Log.e(DEBUG_TAG, "Error getting data", task.getException());
                     }
                 }
         );

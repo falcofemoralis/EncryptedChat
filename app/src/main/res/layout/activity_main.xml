@@ -1,44 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
+    android:id="@+id/activity_main_ll_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1"
     tools:context=".Views.MainActivity">
 
-    <ListView
-        android:id="@+id/msgList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/msgField"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="22dp"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="16dp" />
-
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnSend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_send"
-        android:tint="@color/white"
-        app:fabSize="mini" />
-
-    <EditText
-        android:id="@+id/msgField"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@id/btnSend"
-        android:hint="Введите сообщение"
-        android:autofillHints="" />
-
-</RelativeLayout>
+</LinearLayout>

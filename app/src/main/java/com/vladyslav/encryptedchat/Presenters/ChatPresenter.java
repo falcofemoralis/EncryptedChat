@@ -1,6 +1,6 @@
 package com.vladyslav.encryptedchat.Presenters;
 
-public class ChatController {
+public class ChatPresenter {
     public void checkKey(){
 
     }
