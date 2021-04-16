@@ -1,55 +1,47 @@
 package com.vladyslav.encryptedchat.Managers;
 
-import android.util.Log;
-
-import com.vladyslav.encryptedchat.Constants.KeyUpdateType;
+import com.vladyslav.encryptedchat.EncryptProcessor.AESProcessor;
+import com.vladyslav.encryptedchat.EncryptProcessor.KeyProcessor;
 import com.vladyslav.encryptedchat.Models.KeyModel;
 import com.vladyslav.encryptedchat.Models.KeyModel.Key;
 import com.vladyslav.encryptedchat.lib.ExCallable;
 
-import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
+import java.util.List;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class KeyManager {
     private KeyModel keyModel;
     private Key key;
+    private AESProcessor aesProcessor;
 
     private static KeyManager instance;
 
-    public static KeyManager getInstance() {
+    public static KeyManager getInstance(String chatId) {
         if (instance == null) {
             instance = new KeyManager();
-            instance.init();
+            if (chatId != null) {
+                instance.init(chatId);
+            }
         }
         return instance;
     }
 
-    private void init() {
-        keyModel = KeyModel.getInstance();
+    private void init(String chatId) {
+        keyModel = KeyModel.getInstance(chatId);
+        aesProcessor = new AESProcessor();
     }
 
     /**
      * Инциализация ключа чата
      */
-    public void initKey() {
+    public void initKey(ExCallable<Key> exCallable) {
         // Получение ключа из базы
         keyModel.getKey(serverKey -> {
             attachKey(serverKey, aVoid -> {
-                // Листенер на прослушивание обновления ключа
-/*                keyModel.addKeyUpdateListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        Log.d(DEBUG_TAG, "key will be updated: ");
-
-                        attachKey(snapshot.getValue(Key.class), aVoid -> {
-                            Log.d(DEBUG_TAG, "key was updated: ");
-                        });
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        // Toast.makeText(getApplicationContext(), "Failed to get key.", Toast.LENGTH_SHORT).show();
-                    }
-                });*/
+                exCallable.call(key);
             });
         });
     }
@@ -62,24 +54,26 @@ public class KeyManager {
     private void attachKey(Key serverKey, ExCallable<Void> exCallable) {
         if (serverKey == null) {
             // Generate key
-            key = new Key("123312", 1);
-            keyModel.updateKey(key, KeyUpdateType.NEW, exCallable);
-            Log.d(DEBUG_TAG, "new key uses: " + key.uses);
-        } else {
-            if (serverKey.uses < 2) {
-                key = serverKey;
-                keyModel.updateKey(key, KeyUpdateType.INC, exCallable);
-                // TODO unblock input
-                Log.d(DEBUG_TAG, "key uses: " + key.uses);
+            KeyProcessor initialKeyProcessor = new KeyProcessor();
+
+            try {
+                key = new Key(initialKeyProcessor.generateRandomKey(), initialKeyProcessor.getIvspec());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        } else {
+            key = serverKey;
+            // TODO unblock input
         }
+
+        keyModel.updateKey(key, exCallable);
     }
 
     /**
      * Ключ убирается
      */
     public void detachKey() {
-        if (key != null) {
+        /*if (key != null) {
             keyModel.removeKeyUpdateListener();
             if (key.uses == 1) {
                 keyModel.removeKey();
@@ -87,15 +81,48 @@ public class KeyManager {
                 keyModel.updateKey(key, KeyUpdateType.DEC, aVoid -> {
                 });
             }
-        }
+        }*/
     }
 
-    /**
-     * Получение сгенерированного ключа
-     *
-     * @return - сненерированный ключ для шифрования данных
-     */
-    public String getCryptographyKey() {
-        return key.generatedKey;
+    private IvParameterSpec getIVspec(List<Integer> ivspec) {
+        byte[] bytes = new byte[ivspec.size()];
+        for (int i = 0; i < ivspec.size(); ++i) {
+            bytes[i] = ivspec.get(i).byteValue();
+        }
+        return new IvParameterSpec(bytes);
+    }
+
+    private SecretKey getSecretKey(List<Integer> key) {
+        byte[] bytes = new byte[key.size()];
+        for (int i = 0; i < key.size(); ++i) {
+            bytes[i] = key.get(i).byteValue();
+        }
+
+        return new SecretKeySpec(bytes, "AES");
+    }
+
+    public byte[] getEncryptedMsg(String msg) {
+        try {
+            return aesProcessor.encrypt(msg, getSecretKey(key.generatedKey), getIVspec(key.ivspec));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String getDecryptedMsg(List<Integer> msg) {
+        try {
+            byte[] bytes = new byte[msg.size()];
+            for (int i = 0; i < msg.size(); ++i) {
+                bytes[i] = msg.get(i).byteValue();
+            }
+
+            return aesProcessor.decrypt(bytes, getSecretKey(key.generatedKey), getIVspec(key.ivspec));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

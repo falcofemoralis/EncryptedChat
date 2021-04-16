@@ -3,6 +3,7 @@ package com.vladyslav.encryptedchat.Views;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
@@ -21,10 +22,6 @@ import com.vladyslav.encryptedchat.Views.Fragments.MainFragment;
 
 public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
     private static final int SIGN_IN_CODE = 1;
-  //  private FirebaseListAdapter<Message> adapter;
-    private FloatingActionButton sendBtn;
-    private static final String CHATS_STORAGE = "chats";
-
     private LinearLayout mainLayout;
     private FragmentManager fragmentManager;
     private static Fragment mainFragment;
@@ -37,7 +34,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
             if (resultCode == RESULT_OK) {
                 showAlert("Вы авторизированы");
                 showMainFragment();
-                //displayAllMessages();
             } else {
                 showAlert("Вы не авторизированы");
                 finish();
@@ -62,8 +58,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
             } else {
                 showAlert("Вы авторизированы");
                 showMainFragment();
-                //   keyManager.initKey();
-                //   displayAllMessages();
             }
         }
     }
@@ -122,62 +116,4 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     private void showAlert(String text) {
         Snackbar.make(mainLayout, text, Snackbar.LENGTH_LONG).show();
     }
-
-
-
-      /*  mainLayout = findViewById(R.id.activity_main);
-        sendBtn = findViewById(R.id.btnSend);
-
-        keyManager = KeyManager.getInstance();
-
-        // Добавление обработчика на кнопку отправить
-        sendBtn.setOnClickListener(v -> {
-            EditText textField = findViewById(R.id.msgField);
-
-            // Если ничего не введенно
-            if (textField.getText().toString().equals(""))
-                return;
-
-            Log.d(DEBUG_TAG, "generated key: " + keyManager.getCryptographyKey());
-
-            // Отправляем сообщение
-            FirebaseDatabase.getInstance().getReference(CHATS_STORAGE).push().setValue(new Message(
-                            FirebaseAuth.getInstance().getCurrentUser().getEmail(),
-                            textField.getText().toString()
-                    )
-            );
-
-            // Очищаем текстовое поле
-            textField.setText("");
-        });
-
-
-    }
-
-    private void displayAllMessages() {
-        ListView listOfMessages = findViewById(R.id.msgList);
-
-        FirebaseListOptions<Message> options = new FirebaseListOptions.Builder<Message>()
-                .setQuery(FirebaseDatabase.getInstance().getReference(CHATS_STORAGE), Message.class)
-                .setLayout(R.layout.list_item)
-                .build();
-
-        adapter = new FirebaseListAdapter<Message>(options) {
-            @Override
-            protected void populateView(@NonNull View v, @NonNull Message model, int position) {
-                ((TextView) v.findViewById(R.id.msg_user)).setText(model.getUserName());
-                ((TextView) v.findViewById(R.id.msg_time)).setText(DateFormat.format("dd-mm-yyyy HH:mm:ss", model.getMsgTime()));
-                ((TextView) v.findViewById(R.id.msg_text)).setText(model.getMsgText());
-            }
-        };
-
-        adapter.startListening();
-        listOfMessages.setAdapter(adapter);
-    }
-
-    @Override
-    protected void onStop() {
-        keyManager.detachKey();
-        super.onStop();
-    }*/
 }

@@ -17,6 +17,8 @@ import com.vladyslav.encryptedchat.ViewsInterfaces.MainView;
 import java.util.List;
 import java.util.Map;
 
+import static com.vladyslav.encryptedchat.Constants.InviteMapKeys.CHAT_ID_KEY;
+import static com.vladyslav.encryptedchat.Constants.InviteMapKeys.EMAIL_FROM_KEY;
 import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
 
 public class MainPresenter {
@@ -25,7 +27,7 @@ public class MainPresenter {
     private MainView mainView;
     private int adapterPosition;
     private boolean isLoaded;
-    private List<String> invitedEmails;
+    private List<Map<String, String>> invites;
 
     public MainPresenter(MainView mainView) {
         this.mainView = mainView;
@@ -59,16 +61,16 @@ public class MainPresenter {
 
                 // Обновляем информацию в обьекте
                 mainView.updateUserInfo(v, model, currentUser.getEmail());
-                mainView.updateInvitation(v, InvitationUpdateType.CLEAR_INVITE);
+                mainView.updateInvitation(v, InvitationUpdateType.CLEAR_INVITE, null, null);
 
                 // Запоминаем позицию текущего юзера
                 if (model.email.equals(currentEmail))
                     adapterPosition = position;
 
-                if (invitedEmails != null) {
-                    for (String email : invitedEmails) {
-                        if (model.email.equals(email)) {
-                            mainView.updateInvitation(v, InvitationUpdateType.GET_INVITE);
+                if (invites != null) {
+                    for (Map<String, String> invite : invites) {
+                        if (model.email.equals(invite.get(EMAIL_FROM_KEY))) {
+                            mainView.updateInvitation(v, InvitationUpdateType.GET_INVITE, invite.get(EMAIL_FROM_KEY), invite.get(CHAT_ID_KEY));
                         }
                     }
                 }
@@ -94,9 +96,9 @@ public class MainPresenter {
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
             if (data != null) {
-                for (Map.Entry<String, List<String>> entry : data.entrySet()) {
+                for (Map.Entry<String, List<Map<String, String>>> entry : data.entrySet()) {
                     if (InvitationManager.denormalizeKey(entry.getKey()).equals(currentUser.getEmail())) {
-                        invitedEmails = entry.getValue();
+                        invites = entry.getValue();
                         usersAdapter.notifyDataSetChanged();
                         return;
                     }

@@ -1,66 +1,86 @@
 package com.vladyslav.encryptedchat.Views.Fragments;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.vladyslav.encryptedchat.Managers.KeyManager;
+import com.vladyslav.encryptedchat.Models.ChatModel.Message;
+import com.vladyslav.encryptedchat.Presenters.ChatPresenter;
 import com.vladyslav.encryptedchat.R;
+import com.vladyslav.encryptedchat.ViewsInterfaces.ChatView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ChatFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class ChatFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public ChatFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ChatFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ChatFragment newInstance(String param1, String param2) {
-        ChatFragment fragment = new ChatFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+public class ChatFragment extends Fragment implements ChatView, View.OnClickListener {
+    private View currentFragment;
+    private ChatPresenter chatPresenter;
+    private ListView msgList;
+    private FloatingActionButton sendBtn;
+    private EditText textField;
+    private String chatId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            chatId = getArguments().getString("chatId");
         }
     }
 
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat, container, false);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setRetainInstance(true);
     }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        currentFragment = inflater.inflate(R.layout.fragment_chat, container, false);
+        msgList = currentFragment.findViewById(R.id.msgList);
+        sendBtn = currentFragment.findViewById(R.id.btnSend);
+        textField = currentFragment.findViewById(R.id.msgField);
+
+        chatPresenter = new ChatPresenter(this, chatId);
+
+        sendBtn.setOnClickListener(this);
+        return currentFragment;
+    }
+
+    @Override
+    public void setMessages(FirebaseListAdapter<Message> adapter) {
+        msgList.setAdapter(adapter);
+    }
+
+    @Override
+    public void updateMessage(View v, String username, String time, String text) {
+        ((TextView) v.findViewById(R.id.msg_user)).setText(username);
+        ((TextView) v.findViewById(R.id.msg_time)).setText(time);
+        ((TextView) v.findViewById(R.id.msg_text)).setText(text);
+    }
+
+    @Override
+    public void onClick(View v) {
+        // Если ничего не введенно
+        if (textField.getText().toString().equals(""))
+            return;
+
+        // Log.d(DEBUG_TAG, "generated key: " + keyManager.getCryptographyKey());
+
+        // Отправляем сообщение
+        chatPresenter.sendMessage(textField.getText().toString());
+
+        // Очищаем текстовое поле
+        textField.setText("");
+    }
+
+
 }

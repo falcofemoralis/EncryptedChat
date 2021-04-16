@@ -4,6 +4,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.vladyslav.encryptedchat.Constants.InvitationUpdateType;
@@ -14,5 +15,5 @@ public interface MainView {
 
     void updateUserInfo(View v, User model, String currentEmail);
 
-    void updateInvitation(View v, InvitationUpdateType type);
+    void updateInvitation(View v, InvitationUpdateType type, @Nullable String email, @Nullable String chatId);
 }

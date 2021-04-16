@@ -1,5 +1,6 @@
 package com.vladyslav.encryptedchat.Views.Fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -17,6 +19,7 @@ import com.vladyslav.encryptedchat.Managers.InvitationManager;
 import com.vladyslav.encryptedchat.Models.UserModel.User;
 import com.vladyslav.encryptedchat.Presenters.MainPresenter;
 import com.vladyslav.encryptedchat.R;
+import com.vladyslav.encryptedchat.Views.OnFragmentInteractionListener;
 import com.vladyslav.encryptedchat.ViewsInterfaces.MainView;
 
 import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
@@ -25,6 +28,14 @@ public class MainFragment extends Fragment implements MainView {
     private View currentFragment;
     private MainPresenter mainPresenter;
     private ListView usersList;
+    private OnFragmentInteractionListener fragmentListener;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        fragmentListener = (OnFragmentInteractionListener) context;
+    }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -42,8 +53,7 @@ public class MainFragment extends Fragment implements MainView {
 
     @Override
     public void setActiveUsers(FirebaseListAdapter<User> usersAdapter) {
-        ListView UsersList = currentFragment.findViewById(R.id.usersList);
-        UsersList.setAdapter(usersAdapter);
+        usersList.setAdapter(usersAdapter);
     }
 
     @Override
@@ -56,47 +66,54 @@ public class MainFragment extends Fragment implements MainView {
             ((TextView) v.findViewById(R.id.user_username)).setText("YOU");
             ((TextView) v.findViewById(R.id.user_email)).setText(model.email);
         } else {
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    InvitationManager.sendInvite(currentEmail, model.email);
-                    updateInvitation(v, InvitationUpdateType.SENT_INVITE);
-                }
+            v.setOnClickListener(v1 -> {
+                String chatId = InvitationManager.sendInvite(currentEmail, model.email);
+                updateInvitation(v1, InvitationUpdateType.SENT_INVITE, null, chatId);
             });
         }
     }
 
     @Override
-    public void updateInvitation(View v, InvitationUpdateType type) {
+    public void updateInvitation(View v, InvitationUpdateType type, String email, String chatId) {
         String text = "";
         if (type == InvitationUpdateType.GET_INVITE) {
             text = "WANT TO START CHAT WITH YOU";
+
+            v.setOnClickListener(v1 -> {
+                Log.d(DEBUG_TAG, "onClick: open chat on acceptor!");
+                InvitationManager.deleteInvite(email);
+                openChat(chatId);
+            });
         } else if (type == InvitationUpdateType.SENT_INVITE) {
-            text = "INVITE WAS SENT";
+            Log.d(DEBUG_TAG, "onClick: open chat on sender!");
+            openChat(chatId);
         }
 
         ((TextView) v.findViewById(R.id.user_invite)).setText(text);
-
-        if (type == InvitationUpdateType.GET_INVITE ) {
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(DEBUG_TAG, "onClick: open chat!");
-                }
-            });
-        }
     }
 
+    private void openChat(@Nullable String chatId) {
+        Bundle bundle = null;
+        if (chatId != null) {
+            bundle = new Bundle();
+            bundle.putSerializable("chatId", chatId);
+        }
+
+        fragmentListener.onFragmentInteraction(this, new ChatFragment(),
+                OnFragmentInteractionListener.Action.NEXT_FRAGMENT_HIDE, bundle, null);
+    }
 
     @Override
     public void onResume() {
-        super.onResume();
+        Log.d(DEBUG_TAG, "onResume: ");
         mainPresenter.addUser();
+        super.onResume();
     }
 
     @Override
-    public void onPause() {
+    public void onStop() {
+        Log.d(DEBUG_TAG, "onStop: ");
         mainPresenter.deleteUser();
-        super.onPause();
+        super.onStop();
     }
 }

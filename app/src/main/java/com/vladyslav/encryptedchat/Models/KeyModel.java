@@ -12,8 +12,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
-import com.vladyslav.encryptedchat.Constants.KeyUpdateType;
 import com.vladyslav.encryptedchat.lib.ExCallable;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
 import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
 
@@ -29,22 +34,32 @@ public class KeyModel {
      * uses - количество использований данного ключа
      */
     public static class Key {
-        public String generatedKey;
-        public int uses;
+        public List<Integer> generatedKey;
+        public List<Integer> ivspec;
+        public boolean inUse;
 
         public Key() {
         }
 
-        public Key(String generatedKey, int uses) {
-            this.generatedKey = generatedKey;
-            this.uses = uses;
+        public Key(SecretKey generatedKey, IvParameterSpec ivspec) {
+            byte[] keyBytes = generatedKey.getEncoded();
+            this.generatedKey = new ArrayList<>();
+            for (byte keyByte : keyBytes)
+                this.generatedKey.add((int) keyByte);
+
+            byte[] ivSpecBytes = ivspec.getIV();
+            this.ivspec = new ArrayList<>();
+            for (byte ivspecByte : ivSpecBytes)
+                this.ivspec.add((int) ivspecByte);
+
+            this.inUse = false;
         }
     }
 
-    public static KeyModel getInstance() {
+    public static KeyModel getInstance(String chatId) {
         if (instance == null) {
             instance = new KeyModel();
-            instance.init();
+            instance.init(chatId);
         }
         return instance;
     }
@@ -52,8 +67,8 @@ public class KeyModel {
     /**
      * Инциализация
      */
-    private void init() {
-        keyRef = FirebaseDatabase.getInstance().getReference(KEY_STORAGE);
+    private void init(String chatId) {
+        keyRef = FirebaseDatabase.getInstance().getReference(KEY_STORAGE + "/" + chatId);
     }
 
     /**
@@ -103,10 +118,9 @@ public class KeyModel {
      * Обновление ключа в базе
      *
      * @param key        - ключ
-     * @param updateType - тип обновления
      * @param exCallable - колбек
      */
-    public void updateKey(Key key, KeyUpdateType updateType, ExCallable<Void> exCallable) {
+    public void updateKey(Key key, ExCallable<Void> exCallable) {
         keyRef.runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
@@ -115,14 +129,9 @@ public class KeyModel {
 
                 if (serverKey == null) {
                     serverKey = key;
-                    currentData.setValue(serverKey);
-                    return Transaction.success(currentData);
+                } else {
+                    serverKey.inUse = true;
                 }
-
-                if (updateType == KeyUpdateType.INC)
-                    serverKey.uses += 1;
-                else if (updateType == KeyUpdateType.DEC)
-                    serverKey.uses -= 1;
 
                 currentData.setValue(serverKey);
                 return Transaction.success(currentData);
