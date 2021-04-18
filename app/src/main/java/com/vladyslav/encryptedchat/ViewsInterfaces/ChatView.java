@@ -8,5 +8,5 @@ import com.firebase.ui.database.FirebaseListAdapter;
 public interface ChatView {
     void setMessages(FirebaseListAdapter<Message> adapter);
 
-    void updateMessage(View v, String username, String time, String text);
+    void updateMessage(View v, String username, String time, String text, boolean isSender);
 }

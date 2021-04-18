@@ -16,15 +16,15 @@ public class ChatModel {
     private String chatId;
 
     public static class Message {
-        public String userName;
+        public String email;
         public List<Integer> msgText;
         public long msgTime;
 
         public Message() {
         }
 
-        public Message(String userName, byte[] msgText) {
-            this.userName = userName;
+        public Message(String email, byte[] msgText) {
+            this.email = email;
             this.msgText = new ArrayList<>();
             for (Byte aByte : msgText) {
                 this.msgText.add((int) aByte);

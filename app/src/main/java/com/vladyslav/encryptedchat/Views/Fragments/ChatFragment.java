@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.firebase.ui.database.FirebaseListAdapter;
+import com.github.library.bubbleview.BubbleTextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.vladyslav.encryptedchat.Managers.KeyManager;
 import com.vladyslav.encryptedchat.Models.ChatModel;
@@ -66,10 +67,11 @@ public class ChatFragment extends Fragment implements ChatView, View.OnClickList
     }
 
     @Override
-    public void updateMessage(View v, String username, String time, String text) {
+    public void updateMessage(View v, String username, String time, String text, boolean isSender) {
         ((TextView) v.findViewById(R.id.msg_user)).setText(username);
         ((TextView) v.findViewById(R.id.msg_time)).setText(time);
-        ((TextView) v.findViewById(R.id.msg_text)).setText(text);
+        BubbleTextView msgTextView = v.findViewById(R.id.msg_text);
+        msgTextView.setText(text);
     }
 
     @Override
@@ -77,8 +79,6 @@ public class ChatFragment extends Fragment implements ChatView, View.OnClickList
         // Если ничего не введенно
         if (textField.getText().toString().equals(""))
             return;
-
-        // Log.d(DEBUG_TAG, "generated key: " + keyManager.getCryptographyKey());
 
         // Отправляем сообщение
         chatPresenter.sendMessage(textField.getText().toString());

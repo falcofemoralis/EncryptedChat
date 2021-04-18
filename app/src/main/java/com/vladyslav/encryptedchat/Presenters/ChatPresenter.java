@@ -6,6 +6,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.firebase.auth.FirebaseAuth;
 import com.vladyslav.encryptedchat.Managers.KeyManager;
 import com.vladyslav.encryptedchat.Models.ChatModel;
 import com.vladyslav.encryptedchat.Models.ChatModel.Message;
@@ -31,14 +32,21 @@ public class ChatPresenter {
     }
 
     private void init() {
+        String currentUserEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+
         messagesAdapter = new FirebaseListAdapter<Message>(chatModel.getMessagesAdapterOptions()) {
             @Override
             protected void populateView(@NonNull View v, @NonNull Message model, int position) {
                 String text = keyManager.getDecryptedMsg(model.msgText);
-                if (text == null) {
+                if (text == null)
                     text = "Failed to decrypt";
-                }
-                chatView.updateMessage(v, model.userName, (String) DateFormat.format("dd-mm-yyyy HH:mm:ss", model.msgTime), text);
+
+                boolean isSender = false;
+
+                if (currentUserEmail.equals(model.email))
+                    isSender = true;
+
+                chatView.updateMessage(v, model.email, (String) DateFormat.format("dd-mm-yyyy HH:mm:ss", model.msgTime), text, isSender);
             }
         };
 
