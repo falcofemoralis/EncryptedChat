@@ -90,7 +90,7 @@ public class InvitationModel {
         });
     }
 
-    public void removeInvite(String email) {
+    public void removeInvite(String email, ExCallable<Void> exCallable) {
         invitationRef.runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
@@ -98,24 +98,27 @@ public class InvitationModel {
                 String clientEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
                 Map<String, List<Map<String, String>>> serverInvitations = (Map<String, List<Map<String, String>>>) currentData.getValue();
-                List<Map<String, String>> invites = serverInvitations.get(InvitationManager.normalizeKey(clientEmail));
+                if (serverInvitations != null) {
+                    List<Map<String, String>> invites = serverInvitations.get(InvitationManager.normalizeKey(clientEmail));
 
-                for (int i = 0; i < invites.size(); ++i) {
-                    Map<String, String> invite = invites.get(i);
-                    if (invite.get(EMAIL_FROM_KEY).equals(email)) {
-                        invites.remove(i);
-                        break;
+                    for (int i = 0; i < invites.size(); ++i) {
+                        Map<String, String> invite = invites.get(i);
+                        if (invite.get(EMAIL_FROM_KEY).equals(email)) {
+                            invites.remove(i);
+                            break;
+                        }
                     }
-                }
 
-                serverInvitations.put(InvitationManager.normalizeKey(clientEmail), invites);
+                    serverInvitations.put(InvitationManager.normalizeKey(clientEmail), invites);
+                }
                 currentData.setValue(serverInvitations);
+
                 return Transaction.success(currentData);
             }
 
             @Override
             public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
-                // Completed
+                exCallable.call(null);
             }
         });
     }

@@ -34,6 +34,11 @@ public class KeyManager {
         aesProcessor = new AESProcessor();
     }
 
+    public static void delete(){
+        KeyModel.delete();
+        instance = null;
+    }
+
     /**
      * Инциализация ключа чата
      */

@@ -24,7 +24,7 @@ import com.vladyslav.encryptedchat.ViewsInterfaces.MainView;
 
 import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
 
-public class MainFragment extends Fragment implements MainView {
+public class MainFragment extends Fragment implements MainView{
     private View currentFragment;
     private MainPresenter mainPresenter;
     private ListView usersList;
@@ -68,7 +68,7 @@ public class MainFragment extends Fragment implements MainView {
         } else {
             v.setOnClickListener(v1 -> {
                 String chatId = InvitationManager.sendInvite(currentEmail, model.email);
-                updateInvitation(v1, InvitationUpdateType.SENT_INVITE, null, chatId);
+                openChat(chatId);
             });
         }
     }
@@ -81,12 +81,10 @@ public class MainFragment extends Fragment implements MainView {
 
             v.setOnClickListener(v1 -> {
                 Log.d(DEBUG_TAG, "onClick: open chat on acceptor!");
-                InvitationManager.deleteInvite(email);
-                openChat(chatId);
+                InvitationManager.deleteInvite(email, data -> {
+                    openChat(chatId);
+                });
             });
-        } else if (type == InvitationUpdateType.SENT_INVITE) {
-            Log.d(DEBUG_TAG, "onClick: open chat on sender!");
-            openChat(chatId);
         }
 
         ((TextView) v.findViewById(R.id.user_invite)).setText(text);
@@ -100,20 +98,23 @@ public class MainFragment extends Fragment implements MainView {
         }
 
         fragmentListener.onFragmentInteraction(this, new ChatFragment(),
-                OnFragmentInteractionListener.Action.NEXT_FRAGMENT_HIDE, bundle, null);
+                OnFragmentInteractionListener.Action.NEXT_FRAGMENT_HIDE, bundle, "OPENED_CHAT");
     }
 
     @Override
     public void onResume() {
-        Log.d(DEBUG_TAG, "onResume: ");
         mainPresenter.addUser();
         super.onResume();
     }
 
     @Override
     public void onStop() {
-        Log.d(DEBUG_TAG, "onStop: ");
         mainPresenter.deleteUser();
         super.onStop();
+    }
+
+    public void performBackPressed(){
+        Log.d(DEBUG_TAG, "OnBackPressed: ");
+        mainPresenter.reshowMessages();
     }
 }

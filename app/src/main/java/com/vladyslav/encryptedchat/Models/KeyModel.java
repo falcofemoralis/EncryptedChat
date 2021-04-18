@@ -64,6 +64,10 @@ public class KeyModel {
         return instance;
     }
 
+    public static void delete(){
+        instance = null;
+    }
+
     /**
      * Инциализация
      */

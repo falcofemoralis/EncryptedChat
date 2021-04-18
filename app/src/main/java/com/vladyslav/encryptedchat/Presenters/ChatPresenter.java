@@ -26,6 +26,7 @@ public class ChatPresenter {
         keyManager.initKey(key -> {
             // Ключ получен, загружаем сообщения
             init();
+            sendMessage("Join in!");
         });
     }
 

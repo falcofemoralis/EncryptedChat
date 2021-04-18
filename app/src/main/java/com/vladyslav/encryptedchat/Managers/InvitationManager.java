@@ -18,9 +18,8 @@ public class InvitationManager {
         InvitationModel.getInstance().getInvitations(exCallable);
     }
 
-    public static void deleteInvite(String email) {
-
-        InvitationModel.getInstance().removeInvite(email);
+    public static void deleteInvite(String email, ExCallable<Void> exCallable) {
+        InvitationModel.getInstance().removeInvite(email, exCallable);
     }
 
     public static String normalizeKey(String key) {

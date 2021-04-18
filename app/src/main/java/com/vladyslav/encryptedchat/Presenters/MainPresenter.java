@@ -60,8 +60,8 @@ public class MainPresenter {
                 String currentEmail = currentUser.getEmail(); // Эмейл юзера на девайсе
 
                 // Обновляем информацию в обьекте
-                mainView.updateUserInfo(v, model, currentUser.getEmail());
                 mainView.updateInvitation(v, InvitationUpdateType.CLEAR_INVITE, null, null);
+                mainView.updateUserInfo(v, model, currentUser.getEmail());
 
                 // Запоминаем позицию текущего юзера
                 if (model.email.equals(currentEmail))
@@ -94,6 +94,7 @@ public class MainPresenter {
         InvitationManager.getInvitationList(data -> {
             Log.d(DEBUG_TAG, "downloaded CurrentInvitations");
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            invites = null;
 
             if (data != null) {
                 for (Map.Entry<String, List<Map<String, String>>> entry : data.entrySet()) {
@@ -105,5 +106,11 @@ public class MainPresenter {
                 }
             }
         });
+    }
+
+    public void reshowMessages() {
+        Log.d(DEBUG_TAG, "reshowMessages: ");
+        if (usersAdapter != null)
+            usersAdapter.notifyDataSetChanged();
     }
 }

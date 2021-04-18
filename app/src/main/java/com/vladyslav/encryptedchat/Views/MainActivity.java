@@ -3,7 +3,6 @@ package com.vladyslav.encryptedchat.Views;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
@@ -13,11 +12,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.database.FirebaseListAdapter;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.vladyslav.encryptedchat.R;
+import com.vladyslav.encryptedchat.Views.Fragments.ChatFragment;
 import com.vladyslav.encryptedchat.Views.Fragments.MainFragment;
 
 public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
@@ -115,5 +113,16 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
     private void showAlert(String text) {
         Snackbar.make(mainLayout, text, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mainFragment != null) {
+            if (!mainFragment.isVisible()) {
+                ((MainFragment) mainFragment).performBackPressed();
+                fragmentManager.popBackStack("OPENED_CHAT", 0);
+            }
+        }
+        super.onBackPressed();
     }
 }

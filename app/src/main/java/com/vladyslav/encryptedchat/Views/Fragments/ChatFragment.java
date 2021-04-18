@@ -1,6 +1,8 @@
 package com.vladyslav.encryptedchat.Views.Fragments;
 
 import android.os.Bundle;
+import android.os.Debug;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +16,13 @@ import androidx.fragment.app.Fragment;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.vladyslav.encryptedchat.Managers.KeyManager;
+import com.vladyslav.encryptedchat.Models.ChatModel;
 import com.vladyslav.encryptedchat.Models.ChatModel.Message;
 import com.vladyslav.encryptedchat.Presenters.ChatPresenter;
 import com.vladyslav.encryptedchat.R;
 import com.vladyslav.encryptedchat.ViewsInterfaces.ChatView;
+
+import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
 
 public class ChatFragment extends Fragment implements ChatView, View.OnClickListener {
     private View currentFragment;
@@ -82,5 +87,11 @@ public class ChatFragment extends Fragment implements ChatView, View.OnClickList
         textField.setText("");
     }
 
-
+    @Override
+    public void onDestroy() {
+        Log.d(DEBUG_TAG, "onDestroy: ");
+        ChatModel.delete();
+        KeyManager.delete();
+        super.onDestroy();
+    }
 }

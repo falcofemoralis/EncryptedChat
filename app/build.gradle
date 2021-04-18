@@ -55,6 +55,6 @@ dependencies {
 
     // FirebaseUI for Cloud Storage
     implementation 'com.firebaseui:firebase-ui-storage:7.1.1'
-
     implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.github.lguipeng:BubbleView:1.0.1'
 }

@@ -53,6 +53,10 @@ public class ChatModel {
         currentUserEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
     }
 
+    public static void delete(){
+        instance = null;
+    }
+
     public FirebaseListOptions<Message> getMessagesAdapterOptions() {
         return new FirebaseListOptions.Builder<Message>()
                 .setQuery(chatRef, Message.class)
