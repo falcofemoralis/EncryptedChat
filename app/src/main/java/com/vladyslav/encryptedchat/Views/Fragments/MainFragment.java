@@ -1,12 +1,13 @@
 package com.vladyslav.encryptedchat.Views.Fragments;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,9 +23,7 @@ import com.vladyslav.encryptedchat.R;
 import com.vladyslav.encryptedchat.Views.OnFragmentInteractionListener;
 import com.vladyslav.encryptedchat.ViewsInterfaces.MainView;
 
-import static com.vladyslav.encryptedchat.Views.MainActivity.DEBUG_TAG;
-
-public class MainFragment extends Fragment implements MainView{
+public class MainFragment extends Fragment implements MainView {
     private View currentFragment;
     private MainPresenter mainPresenter;
     private ListView usersList;
@@ -62,8 +61,8 @@ public class MainFragment extends Fragment implements MainView{
         ((TextView) v.findViewById(R.id.user_email)).setText(model.email);
 
         if (model.email.equals(currentEmail)) {
-            ((TextView) v.findViewById(R.id.user_username)).setText("YOU");
-            ((TextView) v.findViewById(R.id.user_email)).setText(model.email);
+            ((RelativeLayout) v.findViewById(R.id.user_container)).setVisibility(View.GONE);
+            ((TextView) currentFragment.findViewById(R.id.deviceUser_email)).setText(model.email);
         } else {
             v.setOnClickListener(v1 -> {
                 String chatId = InvitationManager.sendInvite(currentEmail, model.email);
@@ -74,16 +73,16 @@ public class MainFragment extends Fragment implements MainView{
 
     @Override
     public void updateInvitation(View v, InvitationUpdateType type, String email, String chatId) {
-        String text = "";
         if (type == InvitationUpdateType.GET_INVITE) {
-            text = "WANT TO START CHAT WITH YOU";
             v.setOnClickListener(v1 -> {
                 InvitationManager.deleteInvite(email, data -> {
                     openChat(chatId);
                 });
             });
+            ((TextView) v.findViewById(R.id.user_invite)).setVisibility(View.VISIBLE);
+            ((TextView) v.findViewById(R.id.user_username)).setTypeface(null, Typeface.BOLD);
+            ((TextView) v.findViewById(R.id.new_invite)).setVisibility(View.VISIBLE);
         }
-        ((TextView) v.findViewById(R.id.user_invite)).setText(text);
     }
 
     private void openChat(@Nullable String chatId) {
@@ -108,7 +107,7 @@ public class MainFragment extends Fragment implements MainView{
         super.onStop();
     }
 
-    public void performBackPressed(){
+    public void performBackPressed() {
         mainPresenter.reshowMessages();
     }
 }
