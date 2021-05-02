@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.firebase.auth.FirebaseAuth;
+import com.vladyslav.encryptedchat.EncryptProcessor.MessageProcessor;
 import com.vladyslav.encryptedchat.Managers.KeyManager;
 import com.vladyslav.encryptedchat.Models.ChatModel;
 import com.vladyslav.encryptedchat.Models.ChatModel.Message;
@@ -17,15 +18,14 @@ public class ChatPresenter {
     private ChatModel chatModel;
     private FirebaseListAdapter<Message> messagesAdapter;
     private KeyManager keyManager;
+    private MessageProcessor messageProcessor;
 
     public ChatPresenter(ChatView chatView, String chatId) {
         this.chatView = chatView;
         this.chatModel = ChatModel.getInstance(chatId);
-
-        // Инициализция ключа
+        this.messageProcessor = new MessageProcessor();
         keyManager = KeyManager.getInstance(chatId);
         keyManager.initKey(key -> {
-            // Ключ получен, загружаем сообщения
             init();
             sendMessage("Join in!");
         });
@@ -37,12 +37,11 @@ public class ChatPresenter {
         messagesAdapter = new FirebaseListAdapter<Message>(chatModel.getMessagesAdapterOptions()) {
             @Override
             protected void populateView(@NonNull View v, @NonNull Message model, int position) {
-                String text = keyManager.getDecryptedMsg(model.msgText);
+                String text = messageProcessor.getDecryptedMsg(model.msgText, keyManager.getSecretKey(), keyManager.getIVspec());
                 if (text == null)
                     text = "Failed to decrypt";
 
                 boolean isSender = false;
-
                 if (currentUserEmail.equals(model.email))
                     isSender = true;
 
@@ -55,7 +54,7 @@ public class ChatPresenter {
     }
 
     public void sendMessage(String text) {
-        byte[] encryptedMsg = keyManager.getEncryptedMsg(text);
+        byte[] encryptedMsg = messageProcessor.getEncryptedMsg(text, keyManager.getSecretKey(), keyManager.getIVspec());
         if (encryptedMsg != null) {
             chatModel.sendMessage(encryptedMsg);
         }

@@ -49,9 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         fragmentManager = getSupportFragmentManager();
 
         if (savedInstanceState == null) {
-            // Проверка авторизован ли пользователь
             if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-                // В случае первого входа - показать окно регистрации\входа
                 startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder().build(), SIGN_IN_CODE);
             } else {
                 showAlert("Вы авторизированы");

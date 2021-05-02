@@ -54,9 +54,7 @@ public class ChatFragment extends Fragment implements ChatView, View.OnClickList
         msgList = currentFragment.findViewById(R.id.msgList);
         sendBtn = currentFragment.findViewById(R.id.btnSend);
         textField = currentFragment.findViewById(R.id.msgField);
-
         chatPresenter = new ChatPresenter(this, chatId);
-
         sendBtn.setOnClickListener(this);
         return currentFragment;
     }
@@ -76,20 +74,14 @@ public class ChatFragment extends Fragment implements ChatView, View.OnClickList
 
     @Override
     public void onClick(View v) {
-        // Если ничего не введенно
         if (textField.getText().toString().equals(""))
             return;
-
-        // Отправляем сообщение
         chatPresenter.sendMessage(textField.getText().toString());
-
-        // Очищаем текстовое поле
         textField.setText("");
     }
 
     @Override
     public void onDestroy() {
-        Log.d(DEBUG_TAG, "onDestroy: ");
         ChatModel.delete();
         KeyManager.delete();
         super.onDestroy();

@@ -92,33 +92,6 @@ public class KeyModel {
     }
 
     /**
-     * Удаление ключа в базе
-     */
-    public void removeKey() {
-        keyRef.removeValue();
-    }
-
-    /**
-     * Добавление прослушивания обновлений ключа
-     *
-     * @param listener - листенер
-     */
-    public void addKeyUpdateListener(ValueEventListener listener) {
-        keyEventListener = listener;
-        keyRef.addValueEventListener(listener);
-    }
-
-    /**
-     * Удаление прослушивания обновлений ключа
-     */
-    public void removeKeyUpdateListener() {
-        if (keyEventListener != null) {
-            keyRef.removeEventListener(keyEventListener);
-            keyEventListener = null;
-        }
-    }
-
-    /**
      * Обновление ключа в базе
      *
      * @param key        - ключ
@@ -129,15 +102,7 @@ public class KeyModel {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                Key serverKey = currentData.getValue(Key.class);
-
-                if (serverKey == null) {
-                    serverKey = key;
-                } else {
-                    serverKey.inUse = true;
-                }
-
-                currentData.setValue(serverKey);
+                currentData.setValue(key);
                 return Transaction.success(currentData);
             }
 

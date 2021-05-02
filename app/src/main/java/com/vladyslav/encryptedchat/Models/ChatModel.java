@@ -70,7 +70,6 @@ public class ChatModel {
     }
 
     public void sendMessage(byte[] text) {
-        // Отправляем сообщение
         chatRef.push().setValue(new Message(currentUserEmail, text));
     }
 }

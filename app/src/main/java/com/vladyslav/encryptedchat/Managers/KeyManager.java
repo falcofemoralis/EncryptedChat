@@ -15,7 +15,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class KeyManager {
     private KeyModel keyModel;
     private Key key;
-    private AESProcessor aesProcessor;
 
     private static KeyManager instance;
 
@@ -31,7 +30,6 @@ public class KeyManager {
 
     private void init(String chatId) {
         keyModel = KeyModel.getInstance(chatId);
-        aesProcessor = new AESProcessor();
     }
 
     public static void delete(){
@@ -68,28 +66,16 @@ public class KeyManager {
             }
         } else {
             key = serverKey;
+            key.inUse = true;
             // TODO unblock input
         }
 
         keyModel.updateKey(key, exCallable);
     }
 
-    /**
-     * Ключ убирается
-     */
-    public void detachKey() {
-        /*if (key != null) {
-            keyModel.removeKeyUpdateListener();
-            if (key.uses == 1) {
-                keyModel.removeKey();
-            } else {
-                keyModel.updateKey(key, KeyUpdateType.DEC, aVoid -> {
-                });
-            }
-        }*/
-    }
+    public IvParameterSpec getIVspec() {
+        List<Integer> ivspec = key.ivspec;
 
-    private IvParameterSpec getIVspec(List<Integer> ivspec) {
         byte[] bytes = new byte[ivspec.size()];
         for (int i = 0; i < ivspec.size(); ++i) {
             bytes[i] = ivspec.get(i).byteValue();
@@ -97,37 +83,13 @@ public class KeyManager {
         return new IvParameterSpec(bytes);
     }
 
-    private SecretKey getSecretKey(List<Integer> key) {
+    public SecretKey getSecretKey() {
+        List<Integer> key = this.key.generatedKey;
         byte[] bytes = new byte[key.size()];
         for (int i = 0; i < key.size(); ++i) {
             bytes[i] = key.get(i).byteValue();
         }
 
         return new SecretKeySpec(bytes, "AES");
-    }
-
-    public byte[] getEncryptedMsg(String msg) {
-        try {
-            return aesProcessor.encrypt(msg, getSecretKey(key.generatedKey), getIVspec(key.ivspec));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    public String getDecryptedMsg(List<Integer> msg) {
-        try {
-            byte[] bytes = new byte[msg.size()];
-            for (int i = 0; i < msg.size(); ++i) {
-                bytes[i] = msg.get(i).byteValue();
-            }
-
-            return aesProcessor.decrypt(bytes, getSecretKey(key.generatedKey), getIVspec(key.ivspec));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 }

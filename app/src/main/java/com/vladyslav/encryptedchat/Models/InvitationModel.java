@@ -48,13 +48,11 @@ public class InvitationModel {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Map<String, List<Map<String, String>>> serverInvitations = (Map<String, List<Map<String, String>>>) dataSnapshot.getValue();
                 if (serverInvitations == null) serverInvitations = new ArrayMap<>();
-                Log.d(DEBUG_TAG, "downloaded invites" + serverInvitations);
                 exCallable.call(serverInvitations);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.d(DEBUG_TAG, "onCancelled: " + error.getDetails());
             }
         });
     }

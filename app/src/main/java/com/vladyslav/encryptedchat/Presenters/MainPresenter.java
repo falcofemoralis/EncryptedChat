@@ -34,23 +34,15 @@ public class MainPresenter {
         this.userModel = new UserModel();
     }
 
-    /**
-     * Добавление юзера в список активных
-     */
     public void addUser() {
         userModel.registerUser(data -> getActiveUsers());
     }
 
-    /**
-     * Удаление пользователя из списка активных
-     */
     public void deleteUser() {
         userModel.unregisterUser(usersAdapter, adapterPosition);
     }
 
-    /**
-     * Получение активных юзеров
-     */
+
     public void getActiveUsers() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -87,9 +79,6 @@ public class MainPresenter {
         mainView.setActiveUsers(usersAdapter);
     }
 
-    /**
-     * Получение инвайтов
-     */
     public void getCurrentInvitations() {
         InvitationManager.getInvitationList(data -> {
             Log.d(DEBUG_TAG, "downloaded CurrentInvitations");

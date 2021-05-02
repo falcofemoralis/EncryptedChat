@@ -62,7 +62,6 @@ public class MainFragment extends Fragment implements MainView{
         ((TextView) v.findViewById(R.id.user_email)).setText(model.email);
 
         if (model.email.equals(currentEmail)) {
-            //  v.findViewById(R.id.userContainer).setVisibility(View.GONE);
             ((TextView) v.findViewById(R.id.user_username)).setText("YOU");
             ((TextView) v.findViewById(R.id.user_email)).setText(model.email);
         } else {
@@ -78,15 +77,12 @@ public class MainFragment extends Fragment implements MainView{
         String text = "";
         if (type == InvitationUpdateType.GET_INVITE) {
             text = "WANT TO START CHAT WITH YOU";
-
             v.setOnClickListener(v1 -> {
-                Log.d(DEBUG_TAG, "onClick: open chat on acceptor!");
                 InvitationManager.deleteInvite(email, data -> {
                     openChat(chatId);
                 });
             });
         }
-
         ((TextView) v.findViewById(R.id.user_invite)).setText(text);
     }
 
@@ -96,7 +92,6 @@ public class MainFragment extends Fragment implements MainView{
             bundle = new Bundle();
             bundle.putSerializable("chatId", chatId);
         }
-
         fragmentListener.onFragmentInteraction(this, new ChatFragment(),
                 OnFragmentInteractionListener.Action.NEXT_FRAGMENT_HIDE, bundle, "OPENED_CHAT");
     }
@@ -114,7 +109,6 @@ public class MainFragment extends Fragment implements MainView{
     }
 
     public void performBackPressed(){
-        Log.d(DEBUG_TAG, "OnBackPressed: ");
         mainPresenter.reshowMessages();
     }
 }
