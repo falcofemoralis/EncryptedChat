@@ -16,4 +16,6 @@ public interface MainView {
     void updateUserInfo(View v, User model, String currentEmail);
 
     void updateInvitation(View v, InvitationUpdateType type, @Nullable String email, @Nullable String chatId);
+
+    void updateDeviceUserInfo(@Nullable String email);
 }

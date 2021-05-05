@@ -55,14 +55,16 @@ public class MainFragment extends Fragment implements MainView {
         usersList.setAdapter(usersAdapter);
     }
 
+
+
     @Override
     public void updateUserInfo(View v, User model, String currentEmail) {
         ((TextView) v.findViewById(R.id.user_username)).setText(model.username);
         ((TextView) v.findViewById(R.id.user_email)).setText(model.email);
 
         if (model.email.equals(currentEmail)) {
-            ((RelativeLayout) v.findViewById(R.id.user_container)).setVisibility(View.GONE);
-            ((TextView) currentFragment.findViewById(R.id.deviceUser_email)).setText(model.email);
+            // TODO берется лаяут у всех, соотвественно сообщений нету. getParent берет одного и того же отца. Проблему решить не смог
+            //((RelativeLayout) v.findViewById(R.id.user_container)).setVisibility(View.GONE);
         } else {
             v.setOnClickListener(v1 -> {
                 String chatId = InvitationManager.sendInvite(currentEmail, model.email);
@@ -83,6 +85,11 @@ public class MainFragment extends Fragment implements MainView {
             ((TextView) v.findViewById(R.id.user_username)).setTypeface(null, Typeface.BOLD);
             ((TextView) v.findViewById(R.id.new_invite)).setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void updateDeviceUserInfo(@Nullable String email) {
+        ((TextView) currentFragment.findViewById(R.id.deviceUser_email)).setText(email);
     }
 
     private void openChat(@Nullable String chatId) {

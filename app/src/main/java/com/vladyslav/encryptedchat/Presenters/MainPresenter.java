@@ -28,10 +28,12 @@ public class MainPresenter {
     private int adapterPosition;
     private boolean isLoaded;
     private List<Map<String, String>> invites;
+    private FirebaseUser currentUser;
 
     public MainPresenter(MainView mainView) {
         this.mainView = mainView;
         this.userModel = new UserModel();
+        init();
     }
 
     public void addUser() {
@@ -42,14 +44,16 @@ public class MainPresenter {
         userModel.unregisterUser(usersAdapter, adapterPosition);
     }
 
+    public void init() {
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mainView.updateDeviceUserInfo(currentUser.getEmail());
+    }
 
     public void getActiveUsers() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
         usersAdapter = new FirebaseListAdapter<User>(userModel.getUsersAdapterOptions()) {
             @Override
             protected void populateView(@NonNull View v, @NonNull User model, int position) {
-                String currentEmail = currentUser.getEmail(); // Эмейл юзера на девайсе
+                String currentEmail = currentUser.getEmail();
 
                 // Обновляем информацию в обьекте
                 mainView.updateInvitation(v, InvitationUpdateType.CLEAR_INVITE, null, null);
